@@ -3,9 +3,11 @@ import { cors } from "hono/cors"
 import { readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import coop from './coop';
 
-const __dirname = join(fileURLToPath(import.meta.url), '../..');
-// public/js lives at packages/web/public/js relative to this file's package root
+// this file is packages/web/src/api/index.ts → its dir is .../src/api
+const __dirname = join(fileURLToPath(import.meta.url), '..');
+// public/js lives at packages/web/public/js → up two from src/api, then public/js
 const PUBLIC_JS = join(__dirname, '../../public/js');
 
 const app = new Hono()
@@ -28,7 +30,8 @@ const app = new Hono()
     if (!file || file.includes('..')) return c.json({ error: 'bad file' }, 400);
     await writeFile(join(PUBLIC_JS, file), content, 'utf-8');
     return c.json({ ok: true });
-  });
+  })
+  .route('/coop', coop);
 
 export type AppType = typeof app;
 export default app;
